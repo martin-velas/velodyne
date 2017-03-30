@@ -20,6 +20,12 @@ target_link_libraries(ringcolors_node
 install(TARGETS ringcolors_node
         RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
 
+add_executable(phasecolors_node phasecolors_node.cc colors.cc)
+target_link_libraries(phasecolors_node
+                      ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})
+install(TARGETS phasecolors_node
+        RUNTIME DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION})
+
 add_library(ringcolors_nodelet ringcolors_nodelet.cc colors.cc)
 target_link_libraries(ringcolors_nodelet
                       ${catkin_LIBRARIES} ${YAML_CPP_LIBRARIES})

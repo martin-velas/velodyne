@@ -16,6 +16,10 @@
 #include "convert.h"
 
 #include <pcl_conversions/pcl_conversions.h>
+#include <cmath>
+#include <algorithm>
+
+#include <velodyne_msgs/FloatStamped.h>
 
 namespace velodyne_pointcloud
 {
@@ -29,6 +33,8 @@ namespace velodyne_pointcloud
     // advertise output point cloud (before subscribing to input data)
     output_ =
       node.advertise<sensor_msgs::PointCloud2>("velodyne_points", 10);
+    rotor_phase_output_ =
+        node.advertise<velodyne_msgs::FloatStamped>("velodyne_rotor_phase", 10);
       
     srv_ = boost::make_shared <dynamic_reconfigure::Server<velodyne_pointcloud::
       CloudNodeConfig> > (private_nh);
@@ -59,22 +65,32 @@ namespace velodyne_pointcloud
       return;                                     // avoid much work
 
     // allocate a point cloud with same time and frame ID as raw data
+    velodyne_msgs::FloatStamped rotor_phase;
     velodyne_rawdata::VPointCloud::Ptr
       outMsg(new velodyne_rawdata::VPointCloud());
     // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
-    outMsg->header.frame_id = scanMsg->header.frame_id;
+    rotor_phase.header.stamp = scanMsg->header.stamp;
+    outMsg->header.frame_id = rotor_phase.header.frame_id = scanMsg->header.frame_id;
     outMsg->height = 1;
 
+    rotor_phase.val = INFINITY;
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
-      {
-        data_->unpack(scanMsg->packets[i], *outMsg);
+    {
+      data_->unpack(scanMsg->packets[i], *outMsg);
+      if(isinf(rotor_phase.val)) {
+        for(velodyne_rawdata::VPointCloud::iterator pt = outMsg->begin(); pt < outMsg->end(); pt++) {
+          rotor_phase.val = std::min(rotor_phase.val, atan2(pt->x, -pt->y)+M_PI);
+        }
       }
+    }
 
     // publish the accumulated cloud message
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
-                     << " Velodyne points, time: " << outMsg->header.stamp);
+                     << " Velodyne points, time: " << outMsg->header.stamp
+                     << " phase: " << rotor_phase.val);
+    rotor_phase_output_.publish(rotor_phase);
     output_.publish(outMsg);
   }
 
