@@ -32,10 +32,6 @@
 // include template implementations to transform a custom point cloud
 #include <pcl_ros/impl/transforms.hpp>
 
-/** types of point and cloud to work with */
-typedef velodyne_rawdata::VPoint VPoint;
-typedef velodyne_rawdata::VPointCloud VPointCloud;
-
 // instantiate template for transforming a VPointCloud
 template bool
   pcl_ros::transformPointCloud<VPoint>(const std::string &,

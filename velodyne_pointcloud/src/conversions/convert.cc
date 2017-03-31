@@ -66,8 +66,7 @@ namespace velodyne_pointcloud
 
     // allocate a point cloud with same time and frame ID as raw data
     velodyne_msgs::FloatStamped rotor_phase;
-    velodyne_rawdata::VPointCloud::Ptr
-      outMsg(new velodyne_rawdata::VPointCloud());
+    VPointCloud::Ptr outMsg(new VPointCloud());
     // outMsg's header is a pcl::PCLHeader, convert it before stamp assignment
     outMsg->header.stamp = pcl_conversions::toPCL(scanMsg->header).stamp;
     rotor_phase.header.stamp = scanMsg->header.stamp;
@@ -78,11 +77,15 @@ namespace velodyne_pointcloud
     // process each packet provided by the driver
     for (size_t i = 0; i < scanMsg->packets.size(); ++i)
     {
+      int last_size = outMsg->size();
       data_->unpack(scanMsg->packets[i], *outMsg);
       if(isinf(rotor_phase.val)) {
-        for(velodyne_rawdata::VPointCloud::iterator pt = outMsg->begin(); pt < outMsg->end(); pt++) {
+        for(VPointCloud::iterator pt = outMsg->begin(); pt < outMsg->end(); pt++) {
           rotor_phase.val = std::min(rotor_phase.val, atan2(pt->x, -pt->y)+M_PI);
         }
+      }
+      for(VPointCloud::iterator pt = outMsg->begin()+last_size; pt < outMsg->end(); pt++) {
+        pt->phase = ((float) i) / scanMsg->packets.size();
       }
     }
 

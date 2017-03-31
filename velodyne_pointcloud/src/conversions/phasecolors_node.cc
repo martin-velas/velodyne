@@ -46,7 +46,7 @@ void phaseCallback(const velodyne_msgs::FloatStampedConstPtr &phaseMsg) {
 
 void convertPoints(const sensor_msgs::PointCloud2ConstPtr &inMsg, const velodyne_msgs::FloatStampedConstPtr &phaseMsg)
 {
-  PointCloud<velodyne_pointcloud::PointXYZIR> in;
+  VPointCloud in;
   fromROSMsg(*inMsg, in);
 
   // allocate an PointXYZRGB message with same time and frame ID as
