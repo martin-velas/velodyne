@@ -69,8 +69,9 @@ void convertPoints(const sensor_msgs::PointCloud2ConstPtr &inMsg, const velodyne
         phase_diff += 2*M_PI;
       }
 
-      p.r = p.g = phase_diff/(2*M_PI) * 255;
-      p.b = (1-phase_diff/2*M_PI) * 255;
+      p.r = phase_diff/(2*M_PI) * 255;
+      p.b = 255;
+      p.g = (1-phase_diff/(2*M_PI)) * 255;
 
       outMsg->push_back(p);
     }
