@@ -33,6 +33,9 @@
 #include <sys/file.h>
 #include <velodyne_driver/input.h>
 
+#include <ros/ros.h>
+#include <sensor_msgs/TimeReference.h>
+
 namespace velodyne_driver
 {
   static const size_t packet_size =
@@ -69,6 +72,9 @@ namespace velodyne_driver
   InputSocket::InputSocket(ros::NodeHandle private_nh, uint16_t port):
     Input(private_nh, port)
   {
+    last_timeref.time_ref = ros::Time(-1.0);
+    timeref_sub = private_nh.subscribe<sensor_msgs::TimeReference>("/imu_timeref", 10, &InputSocket::timeReferenceCallback, this);
+
     sockfd_ = -1;
     
     if (!devip_str_.empty()) {
@@ -202,9 +208,28 @@ namespace velodyne_driver
     // Average the times at which we begin and end reading.  Use that to
     // estimate when the scan occurred. Add the time offset.
     double time2 = ros::Time::now().toSec();
-    pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+    if(last_timeref.time_ref.toSec() < 0.0001) {
+      pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+    } else {
+      uint32_t packet_time = ((uint32_t *)(&pkt->data[1200]))[0];
+      pkt->stamp = ros::Time(timeToRos(packet_time) + time_offset);
+    }
 
     return 0;
+  }
+
+  void InputSocket::timeReferenceCallback(const sensor_msgs::TimeReference::ConstPtr &timeref_msg) {
+    last_timeref = *timeref_msg;
+  }
+
+  double InputSocket::timeToRos(uint32_t packet_time) {
+    double packet_seconds = packet_time * 1e-6;
+    double time_correction = packet_seconds - last_timeref.time_ref.toSec();
+    if(fabs(time_correction) > 60.0) {
+      ROS_WARN("Difference between time references is > 1min.");
+      time_correction = 0.0;
+    }
+    return last_timeref.header.stamp.toSec() + time_correction;
   }
 
   ////////////////////////////////////////////////////////////////////////

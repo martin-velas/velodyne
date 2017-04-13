@@ -39,6 +39,7 @@
 
 #include <ros/ros.h>
 #include <velodyne_msgs/VelodynePacket.h>
+#include <sensor_msgs/TimeReference.h>
 
 namespace velodyne_driver
 {
@@ -80,11 +81,17 @@ namespace velodyne_driver
     virtual int getPacket(velodyne_msgs::VelodynePacket *pkt, 
                           const double time_offset);
     void setDeviceIP( const std::string& ip );
+
+    void timeReferenceCallback(const sensor_msgs::TimeReference::ConstPtr &timeref_msg);
+
+    double timeToRos(uint32_t packet_time);
   private:
 
   private:
     int sockfd_;
     in_addr devip_;
+    ros::Subscriber timeref_sub;
+    sensor_msgs::TimeReference last_timeref;
   };
 
 
