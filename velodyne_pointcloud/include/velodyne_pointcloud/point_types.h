@@ -19,6 +19,7 @@
 #ifndef __VELODYNE_POINTCLOUD_POINT_TYPES_H
 #define __VELODYNE_POINTCLOUD_POINT_TYPES_H
 
+#include <pcl/point_cloud.h>
 #include <pcl/point_types.h>
 
 namespace velodyne_pointcloud
