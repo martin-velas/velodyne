@@ -72,7 +72,7 @@ namespace velodyne_driver
   InputSocket::InputSocket(ros::NodeHandle private_nh, uint16_t port):
     Input(private_nh, port)
   {
-    last_timeref.time_ref = ros::Time(-1.0);
+    last_timeref.time_ref = ros::Time(0.0);
     timeref_sub = private_nh.subscribe<sensor_msgs::TimeReference>("/imu_timeref", 10, &InputSocket::timeReferenceCallback, this);
 
     sockfd_ = -1;
