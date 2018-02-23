@@ -227,6 +227,7 @@ namespace velodyne_driver
     double time_correction = packet_seconds - last_timeref.time_ref.toSec();
     if(fabs(time_correction) > 60.0) {
       ROS_WARN("Difference between time references is > 1min.");
+      ROS_WARN_STREAM("Last timeref: " << last_timeref.time_ref.toSec() << ", packet_seconds: " << packet_seconds);
       time_correction = 0.0;
     }
     return last_timeref.header.stamp.toSec() + time_correction;
