@@ -20,6 +20,7 @@
 #include <algorithm>
 
 #include <velodyne_msgs/FloatStamped.h>
+#include <velodyne_driver/input.h>
 
 namespace velodyne_pointcloud
 {
@@ -28,7 +29,6 @@ namespace velodyne_pointcloud
     data_(new velodyne_rawdata::RawData())
   {
     data_->setup(private_nh);
-
 
     // advertise output point cloud (before subscribing to input data)
     output_ =
@@ -48,6 +48,12 @@ namespace velodyne_pointcloud
       node.subscribe("velodyne_packets", 10,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
+
+    std::string output_timestamps_fn;
+    private_nh.getParam("output_timestamps_file", output_timestamps_fn);
+    if(!output_timestamps_fn.empty()) {
+      output_timestamps.open(output_timestamps_fn.c_str());
+    }
   }
   
   void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
@@ -95,6 +101,10 @@ namespace velodyne_pointcloud
                      << " phase: " << rotor_phase.val);
     rotor_phase_output_.publish(rotor_phase);
     output_.publish(outMsg);
+
+    if(output_timestamps.is_open()) {
+      output_timestamps << outMsg->header.stamp << " " << velodyne_driver::packet_time(scanMsg->packets[0]) << std::endl;
+    }
   }
 
 } // namespace velodyne_pointcloud

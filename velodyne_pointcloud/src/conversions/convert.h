@@ -49,6 +49,8 @@ namespace velodyne_pointcloud
     ros::Publisher output_;
     ros::Publisher rotor_phase_output_;
 
+    std::ofstream output_timestamps;
+
     /// configuration parameters
     typedef struct {
       int npackets;                    ///< number of packets to combine

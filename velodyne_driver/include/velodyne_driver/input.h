@@ -46,6 +46,10 @@ namespace velodyne_driver
   static uint16_t DATA_PORT_NUMBER = 2368;     // default data port
   static uint16_t POSITION_PORT_NUMBER = 8308; // default position port
 
+  inline double packet_time(const velodyne_msgs::VelodynePacket &pkt) {
+    return ((uint32_t *)(&pkt.data[1200]))[0] * 1e-6;
+  }
+
   /** @brief Velodyne input base class */
   class Input
   {
