@@ -210,6 +210,7 @@ namespace velodyne_driver
     double time2 = ros::Time::now().toSec();
     if(last_timeref.time_ref.toSec() < 0.0001) {
       pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
+      ROS_WARN("Missing time reference!");
     } else {
       uint32_t packet_time = ((uint32_t *)(&pkt->data[1200]))[0];
       pkt->stamp = ros::Time(timeToRos(packet_time) + time_offset);
@@ -226,8 +227,8 @@ namespace velodyne_driver
     double packet_seconds = packet_time * 1e-6;
     double time_correction = packet_seconds - last_timeref.time_ref.toSec();
     if(fabs(time_correction) > 60.0) {
-      ROS_WARN("Difference between time references is > 1min.");
-      ROS_WARN_STREAM("Last timeref: " << last_timeref.time_ref.toSec() << ", packet_seconds: " << packet_seconds);
+      ROS_ERROR("Difference between time references is > 1min.");
+      ROS_ERROR_STREAM("Last timeref: " << last_timeref.time_ref.toSec() << ", packet_seconds: " << packet_seconds);
       time_correction = 0.0;
     }
     return last_timeref.header.stamp.toSec() + time_correction;
