@@ -92,7 +92,9 @@ namespace velodyne_pointcloud
     output_.publish(outMsg);
 
     if(output_timestamps.is_open()) {
-      output_timestamps << outMsg->header.stamp << " " << velodyne_driver::packet_time(scanMsg->packets[0]) << std::endl;
+      double p_time = velodyne_driver::packet_time(scanMsg->packets[0]);
+      static velodyne_driver::HourOverflowFix fixer;
+      output_timestamps << outMsg->header.stamp << " " << fixer.fix(p_time) << std::endl;
     }
   }
 

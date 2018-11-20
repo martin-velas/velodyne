@@ -223,19 +223,9 @@ namespace velodyne_driver
     last_timeref = *timeref_msg;
   }
 
-  // SpatialDual publish NEMEA timestamps within current hour to Velodyne
-  double fixHourOverflow(const double hourTimestamp) {
-    static int hours = 0;
-    static float last_timestamp = -1.0;
-    if(last_timestamp > hourTimestamp) {
-      hours++;
-    }
-    last_timestamp = hourTimestamp;
-    return last_timestamp + 60*60*hours;
-  }
-
   double InputSocket::timeToRos(uint32_t packet_time) {
-    double packet_seconds = fixHourOverflow(packet_time * 1e-6);
+    static HourOverflowFix fixer;
+    double packet_seconds = fixer.fix(packet_time * 1e-6);
     double time_correction = packet_seconds - last_timeref.time_ref.toSec();
     if(fabs(time_correction) > 60.0) {
       ROS_ERROR("Difference between time references is > 1min.");

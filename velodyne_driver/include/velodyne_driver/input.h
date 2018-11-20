@@ -50,6 +50,26 @@ namespace velodyne_driver
     return ((uint32_t *)(&pkt.data[1200]))[0] * 1e-6;
   }
 
+  // SpatialDual publish NEMEA timestamps within current hour to Velodyne
+  class HourOverflowFix {
+  public:
+    HourOverflowFix(void) :
+      hours(0), last_timestamp(-1.0) {
+    }
+
+    double fix(const double hourTimestamp) {
+      if(last_timestamp > hourTimestamp) {
+        hours++;
+      }
+      last_timestamp = hourTimestamp;
+      return last_timestamp + 60*60*hours;
+    }
+
+  private:
+    int hours;
+    float last_timestamp;
+  };
+
   /** @brief Velodyne input base class */
   class Input
   {
