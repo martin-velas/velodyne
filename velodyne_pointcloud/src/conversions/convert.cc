@@ -20,7 +20,6 @@
 #include <algorithm>
 
 #include <velodyne_msgs/FloatStamped.h>
-#include <velodyne_driver/input.h>
 
 namespace velodyne_pointcloud
 {
@@ -93,7 +92,6 @@ namespace velodyne_pointcloud
 
     if(output_timestamps.is_open()) {
       double p_time = velodyne_driver::packet_time(scanMsg->packets[0]);
-      static velodyne_driver::HourOverflowFix fixer;
       output_timestamps << outMsg->header.stamp << " " << fixer.fix(p_time) << std::endl;
     }
   }

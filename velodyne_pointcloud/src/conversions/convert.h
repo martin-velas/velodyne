@@ -24,6 +24,7 @@
 
 #include <dynamic_reconfigure/server.h>
 #include <velodyne_pointcloud/CloudNodeConfig.h>
+#include <velodyne_driver/input.h>
 
 namespace velodyne_pointcloud
 {
@@ -48,6 +49,7 @@ namespace velodyne_pointcloud
     ros::Subscriber velodyne_scan_;
     ros::Publisher output_;
 
+    velodyne_driver::HourOverflowFix fixer;
     std::ofstream output_timestamps;
 
     /// configuration parameters
