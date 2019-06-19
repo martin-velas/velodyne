@@ -45,12 +45,6 @@ namespace velodyne_pointcloud
       node.subscribe("velodyne_packets", 100,
                      &Convert::processScan, (Convert *) this,
                      ros::TransportHints().tcpNoDelay(true));
-
-    std::string output_timestamps_fn;
-    private_nh.getParam("output_timestamps_file", output_timestamps_fn);
-    if(!output_timestamps_fn.empty()) {
-      output_timestamps.open(output_timestamps_fn.c_str());
-    }
   }
   
   void Convert::callback(velodyne_pointcloud::CloudNodeConfig &config,
@@ -79,7 +73,7 @@ namespace velodyne_pointcloud
     {
       int last_size = outMsg->size();
       data_->unpack(scanMsg->packets[i], *outMsg);
-      float phase = ((float) i) / scanMsg->packets.size();
+      float phase = fixer.fix(velodyne_driver::packet_time(scanMsg->packets[i]));
       for(VPointCloud::iterator pt = outMsg->begin()+last_size; pt < outMsg->end(); pt++) {
         pt->phase = phase;
       }
@@ -89,11 +83,6 @@ namespace velodyne_pointcloud
     ROS_DEBUG_STREAM("Publishing " << outMsg->height * outMsg->width
                      << " Velodyne points, time: " << outMsg->header.stamp);
     output_.publish(outMsg);
-
-    if(output_timestamps.is_open()) {
-      double p_time = velodyne_driver::packet_time(scanMsg->packets[0]);
-      output_timestamps << outMsg->header.stamp << " " << fixer.fix(p_time) << std::endl;
-    }
   }
 
 } // namespace velodyne_pointcloud

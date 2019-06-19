@@ -50,7 +50,6 @@ namespace velodyne_pointcloud
     ros::Publisher output_;
 
     velodyne_driver::HourOverflowFix fixer;
-    std::ofstream output_timestamps;
 
     /// configuration parameters
     typedef struct {
