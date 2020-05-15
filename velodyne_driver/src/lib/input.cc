@@ -72,9 +72,6 @@ namespace velodyne_driver
   InputSocket::InputSocket(ros::NodeHandle private_nh, uint16_t port):
     Input(private_nh, port)
   {
-    last_timeref.time_ref = ros::Time(0.0);
-    timeref_sub = private_nh.subscribe<sensor_msgs::TimeReference>("/imu_timeref", 10, &InputSocket::timeReferenceCallback, this);
-
     sockfd_ = -1;
     
     if (!devip_str_.empty()) {
@@ -120,7 +117,7 @@ namespace velodyne_driver
   /** @brief Get one velodyne packet. */
   int InputSocket::getPacket(velodyne_msgs::VelodynePacket *pkt, const double time_offset)
   {
-    double time1 = ros::Time::now().toSec();
+    pkt->stamp = ros::Time::now();
 
     struct pollfd fds[1];
     fds[0].fd = sockfd_;
@@ -205,35 +202,9 @@ namespace velodyne_driver
                          << nbytes << " bytes");
       }
 
-    // Average the times at which we begin and end reading.  Use that to
-    // estimate when the scan occurred. Add the time offset.
-    double time2 = ros::Time::now().toSec();
-    if(last_timeref.time_ref.toSec() < 0.0001) {
-      pkt->stamp = ros::Time((time2 + time1) / 2.0 + time_offset);
-      ROS_WARN("Missing time reference!");
-    } else {
-      uint32_t packet_time = ((uint32_t *)(&pkt->data[1200]))[0];
-      pkt->stamp = ros::Time(timeToRos(packet_time) + time_offset);
-    }
-
     return 0;
   }
 
-  void InputSocket::timeReferenceCallback(const sensor_msgs::TimeReference::ConstPtr &timeref_msg) {
-    last_timeref = *timeref_msg;
-  }
-
-  double InputSocket::timeToRos(uint32_t packet_time) {
-    static HourOverflowFix fixer;
-    double packet_seconds = fixer.fix(packet_time * 1e-6);
-    double time_correction = packet_seconds - last_timeref.time_ref.toSec();
-    if(fabs(time_correction) > 60.0) {
-      ROS_ERROR("Difference between time references is > 1min.");
-      ROS_ERROR_STREAM("Last timeref: " << last_timeref.time_ref.toSec() << ", packet_seconds: " << packet_seconds);
-      time_correction = 0.0;
-    }
-    return last_timeref.header.stamp.toSec() + time_correction;
-  }
 
   ////////////////////////////////////////////////////////////////////////
   // InputPCAP class implementation

@@ -114,8 +114,6 @@ namespace velodyne_driver
   private:
     int sockfd_;
     in_addr devip_;
-    ros::Subscriber timeref_sub;
-    sensor_msgs::TimeReference last_timeref;
   };
 
 
