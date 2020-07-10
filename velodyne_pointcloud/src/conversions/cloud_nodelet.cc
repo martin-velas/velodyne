@@ -45,5 +45,4 @@ namespace velodyne_pointcloud
 // Register this plugin with pluginlib.  Names must match nodelet_velodyne.xml.
 //
 // parameters: package, class name, class type, base class type
-PLUGINLIB_DECLARE_CLASS(velodyne_pointcloud, CloudNodelet,
-                        velodyne_pointcloud::CloudNodelet, nodelet::Nodelet);
+PLUGINLIB_EXPORT_CLASS(velodyne_pointcloud::CloudNodelet, nodelet::Nodelet);
