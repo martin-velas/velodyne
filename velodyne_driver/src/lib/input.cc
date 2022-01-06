@@ -317,7 +317,7 @@ namespace velodyne_driver
               packet_rate_.sleep();
             
             memcpy(&pkt->data[0], pkt_data+42, packet_size);
-            pkt->stamp = ros::Time::now(); // time_offset not considered here, as no synchronization required
+            pkt->stamp = rosTimeFromGpsTimestamp(&(pkt->data[1200]));
             empty_ = false;
             return 0;                   // success
           }

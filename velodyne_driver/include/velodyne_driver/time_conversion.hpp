@@ -59,6 +59,11 @@ ros::Time resolveHourAmbiguity(const ros::Time &stamp, const ros::Time &nominal_
     return retval;
 }
 
+void toTimeOfCurrentDay(ros::Time &stamp) {
+  static const int SECONDS_OF_DAY = 24 * 60 * 60;
+  stamp.sec %= SECONDS_OF_DAY;
+}
+
 ros::Time rosTimeFromGpsTimestamp(const uint8_t * const data) {
     const int HOUR_TO_SEC = 3600;
     // time for each packet is a 4 byte uint
@@ -72,6 +77,7 @@ ros::Time rosTimeFromGpsTimestamp(const uint8_t * const data) {
     ros::Time stamp = ros::Time((cur_hour * HOUR_TO_SEC) + (usecs / 1000000),
                                 (usecs % 1000000) * 1000);
     stamp = resolveHourAmbiguity(stamp, time_nom);
+    toTimeOfCurrentDay(stamp);
     return stamp;
 }
 

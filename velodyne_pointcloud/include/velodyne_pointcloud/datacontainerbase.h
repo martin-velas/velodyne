@@ -116,6 +116,14 @@ public:
                         const float intensity, const float time) = 0;
   virtual void newLine() = 0;
 
+  static void timeOfCurrentDayToRos(ros::Time &stamp) {
+    static const int SECONDS_OF_DAY = 24 * 60 * 60;
+    stamp.sec %= SECONDS_OF_DAY;    // make sure we have time of current day
+
+    const int ros_days = ros::Time::now().sec / SECONDS_OF_DAY;
+    stamp.sec += ros_days * SECONDS_OF_DAY;
+  }
+
   const sensor_msgs::PointCloud2& finishCloud()
   {
     cloud.data.resize(cloud.point_step * cloud.width * cloud.height);
@@ -132,6 +140,8 @@ public:
     {
       cloud.header.frame_id = sensor_frame;
     }
+
+    timeOfCurrentDayToRos(cloud.header.stamp);
 
     ROS_DEBUG_STREAM("Prepared cloud width" << cloud.height * cloud.width
                                             << " Velodyne points, time: " << cloud.header.stamp);

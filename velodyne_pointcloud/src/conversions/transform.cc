@@ -137,7 +137,7 @@ namespace velodyne_pointcloud
         // fixed frame not available
         return;
       }
-      data_->unpack(scanMsg->packets[i], *container_ptr, scanMsg->header.stamp);
+      data_->unpack(scanMsg->packets[i], *container_ptr, ros::Time(0));
     }
     // publish the accumulated cloud message
     output_.publish(container_ptr->finishCloud());
