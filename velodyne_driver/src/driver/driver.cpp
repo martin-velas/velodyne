@@ -59,7 +59,7 @@ VelodyneDriver::VelodyneDriver(const rclcpp::NodeOptions & options)
   diagnostics_(this, 0.2)
 {
   std::string devip = this->declare_parameter("device_ip", std::string(""));
-  bool gps_time = this->declare_parameter("gps_time", false);
+  bool gps_time = this->declare_parameter("gps_time", true);
 
   rcl_interfaces::msg::ParameterDescriptor offset_desc;
   offset_desc.name = "time_offset";

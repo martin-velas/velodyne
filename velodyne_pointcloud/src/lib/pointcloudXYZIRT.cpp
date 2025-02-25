@@ -55,7 +55,7 @@ PointcloudXYZIRT::PointcloudXYZIRT(
     "z", 1, sensor_msgs::msg::PointField::FLOAT32,
     "intensity", 1, sensor_msgs::msg::PointField::FLOAT32,
     "ring", 1, sensor_msgs::msg::PointField::UINT16,
-    "time", 1, sensor_msgs::msg::PointField::FLOAT32),
+    "time", 1, sensor_msgs::msg::PointField::FLOAT64),
   iter_x_(cloud, "x"), iter_y_(cloud, "y"), iter_z_(cloud, "z"),
   iter_intensity_(cloud, "intensity"), iter_ring_(cloud, "ring"), iter_time_(cloud, "time")
 {}
@@ -68,7 +68,7 @@ void PointcloudXYZIRT::setup(const velodyne_msgs::msg::VelodyneScan::ConstShared
   iter_z_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "z");
   iter_intensity_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "intensity");
   iter_ring_ = sensor_msgs::PointCloud2Iterator<uint16_t>(cloud, "ring");
-  iter_time_ = sensor_msgs::PointCloud2Iterator<float>(cloud, "time");
+  iter_time_ = sensor_msgs::PointCloud2Iterator<double>(cloud, "time");
 }
 
 void PointcloudXYZIRT::newLine()

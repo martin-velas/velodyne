@@ -4,3 +4,6 @@
 *.user
 doc
 TAGS
+
+.idea/
+cmake-build-debug/

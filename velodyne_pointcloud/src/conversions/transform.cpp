@@ -138,6 +138,14 @@ Transform::Transform(const rclcpp::NodeOptions & options)
   container_ptr_->configure(min_range, max_range, target_frame, fixed_frame);
 }
 
+inline
+rclcpp::Time startTimeOfTheDay(const rclcpp::Time & stamp) {
+  static constexpr rcl_time_point_value_t NANOSECONDS_OF_DAY = 24ul * 60 * 60 * (1000 * 1000 * 1000);
+  rcl_time_point_value_t nsecs = stamp.nanoseconds();
+  nsecs -= nsecs % NANOSECONDS_OF_DAY;
+  return rclcpp::Time(nsecs, stamp.get_clock_type());
+}
+
 /** @brief Callback for raw scan messages.
  *
  *  @pre TF message filter has already waited until the transform to
@@ -168,7 +176,8 @@ void Transform::processScan(
       // fixed frame not available
       return;
     }
-    data_->unpack(scanMsg->packets[i], *container_ptr_, scanMsg->header.stamp);
+    // timestamps of all the points will be converted to top-of-the-day
+    data_->unpack(scanMsg->packets[i], *container_ptr_, startTimeOfTheDay(scanMsg->header.stamp));
   }
 
   // publish the accumulated cloud message
