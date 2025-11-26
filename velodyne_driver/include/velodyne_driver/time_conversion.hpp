@@ -35,6 +35,9 @@
 
 #include <rclcpp/time.hpp>
 
+#define VELODYNE_DRIVER_DEBUG_TIME_CONVERSION 0
+
+
 /** @brief Function used to check that hour assigned to timestamp in conversion is
  * correct. Velodyne only returns time since the top of the hour, so if the computer clock
  * and the velodyne clock (gps-synchronized) are a little off, there is a chance the wrong
@@ -79,7 +82,20 @@ rclcpp::Time rosTimeFromGpsTimestamp(rclcpp::Time & time_nom, const uint8_t * co
   auto stamp = rclcpp::Time(
     (cur_hour * HOUR_TO_SEC) + (usecs / 1000000),
     (usecs % 1000000) * 1000);
-  return resolveHourAmbiguity(stamp, time_nom);
+  auto resolved_ambiguity = resolveHourAmbiguity(stamp, time_nom);
+
+#if VELODYNE_DRIVER_DEBUG_TIME_CONVERSION
+  static int counter = 0;
+  if(counter++ % 1000 == 0) {
+    RCLCPP_INFO(rclcpp::get_logger("velodyne_packet_stamps"), "raw_usecs:      %u", usecs);
+    RCLCPP_INFO(rclcpp::get_logger("velodyne_packet_stamps"), "raw_gps_stamp:  %.3f", stamp.seconds());
+    RCLCPP_INFO(rclcpp::get_logger("velodyne_packet_stamps"), "time_nominal:   %.3f", time_nom.seconds());
+    RCLCPP_INFO(rclcpp::get_logger("velodyne_packet_stamps"), "hour_fix_stamp: %.3f", resolved_ambiguity.seconds());
+    RCLCPP_INFO(rclcpp::get_logger("velodyne_packet_stamps"), "----------------------------------------");
+  }
+#endif
+
+  return resolved_ambiguity;
 }
 
 #endif  // VELODYNE_DRIVER__TIME_CONVERSION_HPP_
