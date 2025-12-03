@@ -51,15 +51,16 @@
 inline
 rclcpp::Time resolveHourAmbiguity(const rclcpp::Time & stamp, const rclcpp::Time & nominal_stamp)
 {
-  const int HALFHOUR_TO_SEC = 1800;
-  rclcpp::Time retval = stamp;
+  constexpr int HALFHOUR_TO_SEC = 1800;
+  constexpr int SEC_TO_NSEC = 1000 * 1000 * 1000;
 
+  rclcpp::Time retval = stamp;
   if (nominal_stamp.seconds() > stamp.seconds()) {
     if (nominal_stamp.seconds() - stamp.seconds() > HALFHOUR_TO_SEC) {
-      retval = rclcpp::Time(retval.seconds() + 2 * HALFHOUR_TO_SEC);
+      retval = rclcpp::Time((stamp.seconds() + 2 * HALFHOUR_TO_SEC) * SEC_TO_NSEC);
     }
   } else if (stamp.seconds() - nominal_stamp.seconds() > HALFHOUR_TO_SEC) {
-    retval = rclcpp::Time(retval.seconds() - 2 * HALFHOUR_TO_SEC);
+    retval = rclcpp::Time((stamp.seconds() - 2 * HALFHOUR_TO_SEC) * SEC_TO_NSEC);
   }
 
   return retval;
